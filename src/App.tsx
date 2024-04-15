@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
+
 const App: React.FC = () => {
   const location = useLocation();
 

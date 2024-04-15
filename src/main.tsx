@@ -1,12 +1,13 @@
 import React from "react";
-import ReactDOM from "react-dom";
+
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import App from "./App";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./screens/Home";
-
-import  NotFound  from "./screens/NotFound";
+import NotFound from "./screens/NotFound";
+import { createRoot } from "react-dom/client";
+import { SelectedCustomerProvider } from "./contexts/SelectedCustomerContext";
 
 const rootElement = document.getElementById("root");
 
@@ -15,6 +16,7 @@ if (!rootElement) {
 }
 
 const router = (
+  <SelectedCustomerProvider>
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<App />}>
@@ -25,6 +27,10 @@ const router = (
       </Route>
     </Routes>
   </BrowserRouter>
+  </SelectedCustomerProvider>
+
 );
 
-ReactDOM.render(router, rootElement);
+const root = createRoot(rootElement);
+
+root.render(router);
