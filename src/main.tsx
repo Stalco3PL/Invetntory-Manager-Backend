@@ -8,6 +8,8 @@ import Home from "./screens/Home";
 import NotFound from "./screens/NotFound";
 import { createRoot } from "react-dom/client";
 import { SelectedCustomerProvider } from "./contexts/SelectedCustomerContext";
+import CustomerDashboard from "./screens/CustomerDashboard";
+import { LoadingProvider } from "./contexts/LoadingContext";
 
 const rootElement = document.getElementById("root");
 
@@ -17,16 +19,18 @@ if (!rootElement) {
 
 const router = (
   <SelectedCustomerProvider>
+    <LoadingProvider>
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<App />}>
         <Route index path="/" element={<Home />} />
-        {/* <Route path="/add" element={<AddVehicle />} />
-        <Route path="/view/:id" element={<ViewVehicle />} /> */}
+        <Route path="/Dashboard/:customerName" element={<CustomerDashboard />} /> 
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   </BrowserRouter>
+  </LoadingProvider>
+
   </SelectedCustomerProvider>
 
 );

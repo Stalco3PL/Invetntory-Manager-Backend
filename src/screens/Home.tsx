@@ -1,27 +1,28 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import Button from "react-bootstrap/Button";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import { fetchCustomers, CustomerData } from "../services/api";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { useSelectedCustomer } from "../contexts/SelectedCustomerContext";
+import { useLoading } from "../contexts/LoadingContext";
 
 const Home: React.FC = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { isLoading, startLoading, stopLoading } = useLoading();
   const [data, setData] = useState<CustomerData[]>([]);
   const { selectedCustomer, setSelectedCustomer } = useSelectedCustomer();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
+     startLoading();
       try {
         const customersData: CustomerData[] = await fetchCustomers();
         setData(customersData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setIsLoading(false);
+        stopLoading();
       }
     };
 
@@ -40,7 +41,7 @@ const Home: React.FC = () => {
     event.preventDefault();
 
     if (selectedCustomer !== null) {
-      navigate(`${selectedCustomer.companyName}/${selectedCustomer.customerId}`);
+      navigate(`Dashboard/${selectedCustomer.companyName}`);
     } else {
       // Handle if no customer is selected
       alert('Please select a customer.');
