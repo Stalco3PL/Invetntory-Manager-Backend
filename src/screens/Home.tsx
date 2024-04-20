@@ -6,6 +6,8 @@ import { fetchCustomers, CustomerData } from "../services/api";
 import { Col, Container, Form, Row } from "react-bootstrap";
 import { useSelectedCustomer } from "../contexts/SelectedCustomerContext";
 import { useLoading } from "../contexts/LoadingContext";
+import { toast } from "react-toastify";
+
 
 const Home: React.FC = () => {
   const { isLoading, startLoading, stopLoading } = useLoading();
@@ -20,6 +22,8 @@ const Home: React.FC = () => {
         const customersData: CustomerData[] = await fetchCustomers();
         setData(customersData);
       } catch (error) {
+        toast.error("Error fetching data, retry again later.")
+
         console.error("Error fetching data:", error);
       } finally {
         stopLoading();
@@ -43,8 +47,7 @@ const Home: React.FC = () => {
     if (selectedCustomer !== null) {
       navigate(`Dashboard/${selectedCustomer.companyName}`);
     } else {
-      // Handle if no customer is selected
-      alert('Please select a customer.');
+      toast.error("Please select a customer")
     }
   };
 
@@ -53,11 +56,12 @@ const Home: React.FC = () => {
       <Container className="text-center" style={{ minHeight: '10vh' }}>
         <h1>Inventory distribution based on Warehouse location</h1>
       </Container>
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '70vh' }}>
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '75vh' }}>
         {isLoading ? (
           <Loader />
         ) : (
           <Container className="mt-5">
+
             <Row className="justify-content-center">
               <Col xs={6}>
                 <Form onSubmit={handleSubmit}>

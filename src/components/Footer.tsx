@@ -5,10 +5,10 @@ const Footer: React.FC = () => {
   const currentYear: number = new Date().getFullYear();
 
   return (
-    <footer>
+    <footer style={{ backgroundColor: '#dbeaff' }}>
       <Container>
         <Row>
-          <Col className="text-center py-3">
+          <Col className="text-center py-1">
             <p>Stalco Inventory Manager &copy; {currentYear}</p>
           </Col>
         </Row>
