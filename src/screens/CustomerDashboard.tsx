@@ -62,7 +62,7 @@ const CustomerDashboard: React.FC = () => {
             data: [claysonCount, whlCount],
       };
     return (
-        <Container fluid>
+        <Container fluid style={{ minHeight: '85vh'}}>
             <Row style={{ height: '30vh', overflowY: 'auto' }}>
                 <h1>{selectedCustomer?.companyName}</h1>
                 {isLoading ? (
@@ -87,7 +87,7 @@ const CustomerDashboard: React.FC = () => {
             </Row>
             <hr/>
             <Row>
-                <Col lg={3} md={4} sm={6} xs={12} style={{ height: '70vh', overflowY: 'auto' }}>
+                <Col lg={3} md={4} sm={6} xs={12} style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                     <h2>SKUs</h2>
                     <InputGroup className="mb-3">
                         <FormControl
@@ -100,9 +100,13 @@ const CustomerDashboard: React.FC = () => {
                         </InputGroup.Text>
                     </InputGroup>
                     {isLoading ? (
-                        <Loader />
+                        <div className="m-5" >
+                        <Loader  />
+
+                        </div>
                     ) : (
-                        <ListGroup>
+                        
+                        <ListGroup style={{ height: window.innerWidth <= 768 ? '30vh' : '100%', overflowY: 'auto' }} >
                             {filteredItems.map(item => (
                                 <ListGroup.Item
                                     key={item}
@@ -115,7 +119,10 @@ const CustomerDashboard: React.FC = () => {
                             ))}
                         </ListGroup>
                     )}
+
                 </Col>
+                {window.innerWidth <= 768 ? <hr/> : <></>}
+
                 <Col lg={9} md={8} sm={6} xs={12}>
     <div>
         {selectedItem ? (
