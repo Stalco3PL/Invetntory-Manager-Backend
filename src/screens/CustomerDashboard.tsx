@@ -146,7 +146,7 @@ const CustomerDashboard: React.FC = () => {
                         {selectedItem ? (
                             <div>
                                 <h2>{selectedItem}</h2>
-                                <ListGroup style={{ width:  window.innerWidth <= 768 ? '50%' : '30%' }}>
+                                <ListGroup style={{ width: window.innerWidth <= 768 ? '50%' : '30%' }}>
                                     {Object.entries(details[selectedItem] || {}).map(([key, value]) => {
                                         if (key === "Clayson") {
                                             claysonData = value;
@@ -155,10 +155,18 @@ const CustomerDashboard: React.FC = () => {
                                         }
                                         return (
                                             <ListGroup.Item key={key}>
-                                                {key}: {value}
+                                                {key}: {typeof value === 'number' ? value.toLocaleString() : value}
                                             </ListGroup.Item>
                                         );
                                     })}
+                                    <>
+                                        <ListGroup.Item>
+                                            Clayson's Percentage: {(claysonData / (claysonData + whlData) * 100).toFixed(2)}%
+                                        </ListGroup.Item>
+                                        <ListGroup.Item>
+                                            WHL's Percentage: {(whlData / (claysonData + whlData) * 100).toFixed(2)}%
+                                        </ListGroup.Item>
+                                    </>
                                 </ListGroup>
                             </div>
                         ) : (

@@ -63,7 +63,7 @@ const Home: React.FC = () => {
           <Container className="mt-5">
 
             <Row className="justify-content-center">
-              <Col xs={6}>
+              <Col md={6} xs={10}>
                 <Form onSubmit={handleSubmit}>
                   <Form.Group controlId="selectCustomer">
                     <Form.Control as="select" onChange={handleSelect}>
