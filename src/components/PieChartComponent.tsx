@@ -44,7 +44,7 @@ const PieChartComponent: React.FC<{ pieChartData?: Partial<PieChartData> }> = ({
     ],
   };
 
-  return <Pie data={chartData} />;
+  return <Pie style={{height: '30rem'}} data={chartData} />;
 };
 
 export default PieChartComponent;

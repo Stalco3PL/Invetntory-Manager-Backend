@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, ListGroup, InputGroup, FormControl, Card } from 'react-bootstrap';
+import { Container, Row, Col, ListGroup, InputGroup, FormControl, Card, Form, Button } from 'react-bootstrap';
 import { BsX } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -11,6 +11,7 @@ import { fetchInventory } from "../services/api";
 import PieChartComponent from '../components/PieChartComponent';
 import BarChartComponent from '../components/BarChartComponent';
 import Loader from '../components/Loader';
+import InventorySummary from '../components/InventorySummary';
 
 
 
@@ -20,8 +21,14 @@ const CustomerDashboard: React.FC = () => {
     const [inventoryData, setInventoryData] = useState<{ summary: { [key: string]: number }, detail: { [key: string]: { [key: string]: number } } } | null>(null);
     const [selectedItem, setSelectedItem] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [inputValue, setInputValue] = useState(''); // State for the input field value
 
     const navigate = useNavigate();
+
+    const handleInputAction = () => {
+        console.log("Add action with input:", inputValue);
+        // Add your API call or action logic here.
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -70,36 +77,11 @@ const CustomerDashboard: React.FC = () => {
                 ) : (
                     <>
                         <Col md={6} sm={3}>
-                            <Card className="text-center" style={{ width: '50%', margin: '0 auto', marginBottom: '10px', padding: '3px' }}>
-                                <Card.Body style={{ padding: '0' }}>
-                                    <Card.Title>Total Inventory</Card.Title>
-                                    <Card.Text> {typeof summary?.Total === 'number' ? summary?.Total.toLocaleString() : 'N/A'} </Card.Text>
-                                </Card.Body>
-                            </Card>
-
-                            <Card className="text-center" style={{ width: '50%', margin: '0 auto', marginBottom: '10px', padding: '3px' }}>
-                                <Card.Body style={{ padding: '0' }}>
-                                    <Card.Title>WHL Total</Card.Title>
-                                    <Card.Text> {typeof whlCount === 'number' ? whlCount.toLocaleString() : 'N/A'}  {summary && summary.Total ? `(${((whlCount / summary.Total) * 100).toFixed(2)}%)` : 'N/A'}</Card.Text>
-                                </Card.Body>
-                            </Card>
-
-                            <Card className="text-center" style={{ width: '50%', margin: '0 auto', padding: '3px' }}>
-                                <Card.Body style={{ padding: '0' }}>
-                                    <Card.Title>Clayson Total</Card.Title>
-                                    <Card.Text> {typeof claysonCount === 'number' ? claysonCount.toLocaleString() : 'N/A'} {summary && summary.Total ? `(${((claysonCount / summary.Total) * 100).toFixed(2)}%)` : 'N/A'}</Card.Text>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                        <Col md={6} >
-                            <div style={{
-                                maxHeight: '24vh', // Set the height as per your requirement
-                            }}>
+                        <InventorySummary summary={summary as { Total: number; Clayson: number; WHL: number; }} />
+                       </Col>
+                        <Col md={6} style={{maxHeight: '24vh'}} >
                                 <BarChartComponent barChartData={barChartData} />
-                            </div>
                         </Col>
-
-
                     </>
                 )}
             </Row>
@@ -141,47 +123,66 @@ const CustomerDashboard: React.FC = () => {
                 </Col>
                 {window.innerWidth <= 768 ? <hr /> : <></>}
 
-                <Col lg={9} md={8} sm={6} xs={12}>
+                <Col lg={9} md={8} sm={6} xs={12} style={{ maxHeight: '70vh', overflowY: 'auto' }}>
                     <div>
-                        {selectedItem ? (
-                            <div>
-                                <h2>{selectedItem}</h2>
-                                <ListGroup style={{ width: window.innerWidth <= 768 ? '50%' : '30%' }}>
-                                    {Object.entries(details[selectedItem] || {}).map(([key, value]) => {
-                                        if (key === "Clayson") {
-                                            claysonData = value;
-                                        } else {
-                                            whlData = value;
-                                        }
-                                        return (
-                                            <ListGroup.Item key={key}>
-                                                {key}: {typeof value === 'number' ? value.toLocaleString() : value}
-                                            </ListGroup.Item>
-                                        );
-                                    })}
-                                    <>
-                                        <ListGroup.Item>
-                                            Clayson's Percentage: {(claysonData / (claysonData + whlData) * 100).toFixed(2)}%
-                                        </ListGroup.Item>
-                                        <ListGroup.Item>
-                                            WHL's Percentage: {(whlData / (claysonData + whlData) * 100).toFixed(2)}%
-                                        </ListGroup.Item>
-                                    </>
-                                </ListGroup>
-                            </div>
+                        {selectedItem ? (       <div className="mb-2" style={{ display: 'flex', flexWrap: 'wrap', justifyContent:"space-between" }}>
+            <div >
+                <h2>{selectedItem}</h2>
+                <ListGroup >
+                    {Object.entries(details[selectedItem] || {}).map(([key, value]) => {
+                        if (key === 'Clayson') {
+                            claysonData = value;
+                        } else {
+                            whlData = value;
+                        }
+                        return (
+                            <ListGroup.Item key={key}>
+                                {key}: {typeof value === 'number' ? value.toLocaleString() : value}
+                            </ListGroup.Item>
+                        );
+                    })}
+                    <>
+                        <ListGroup.Item>
+                            Clayson's Percentage: {(claysonData / (claysonData + whlData) * 100).toFixed(2)}%
+                        </ListGroup.Item>
+                        <ListGroup.Item>
+                            WHL's Percentage: {(whlData / (claysonData + whlData) * 100).toFixed(2)}%
+                        </ListGroup.Item>
+                    </>
+                </ListGroup>
+            </div>
+            <div style={{  display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+                <Form >
+                    <Form.Group className="mb-3" controlId="thresholdInput">
+                        <Form.Label>Threshold</Form.Label>
+                        <FormControl
+                            placeholder="Enter a number"
+                            aria-label="Item Threshold"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                        />
+                        <Button variant="primary" className="mt-2" onClick={handleInputAction}>
+                            ADD
+                        </Button>
+                    </Form.Group>
+                </Form>
+            </div>
+        </div>
                         ) : (
                             <p>Select an item to view details</p>
                         )}
-                        {selectedItem && (
+                        {selectedItem && (<>
                             <div style={{
                                 display: 'flex',
                                 justifyContent: 'center',
-                                alignItems: 'center',
                                 width: '100%',
                                 height: '50vh'
                             }}>
                                 <PieChartComponent pieChartData={{ data: [claysonData, whlData] }} />
+
                             </div>
+
+                                </>
                         )}
                     </div>
                 </Col>
