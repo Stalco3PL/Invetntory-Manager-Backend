@@ -175,8 +175,7 @@ const CustomerDashboard: React.FC = () => {
                             <div style={{
                                 display: 'flex',
                                 justifyContent: 'center',
-                                width: '100%',
-                                height: '50vh'
+                                height: '30rem'
                             }}>
                                 <PieChartComponent pieChartData={{ data: [claysonData, whlData] }} />
 
