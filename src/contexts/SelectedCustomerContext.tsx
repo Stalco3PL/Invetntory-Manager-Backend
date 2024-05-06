@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CustomerData } from '../services/api';
 
 interface SelectedCustomerContextType {
-  selectedCustomer: CustomerData | null;
-  setSelectedCustomer: React.Dispatch<React.SetStateAction<CustomerData | null>>;
+  selectedCustomer: CustomerData ;
+  setSelectedCustomer: React.Dispatch<React.SetStateAction<CustomerData >>;
 }
 
 const SelectedCustomerContext = createContext<SelectedCustomerContextType | undefined>(undefined);
@@ -21,7 +21,18 @@ interface SelectedCustomerProviderProps {
 }
 
 export const SelectedCustomerProvider: React.FC<SelectedCustomerProviderProps> = ({ children }) => {
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerData >(() => {
+    const storedCustomer = localStorage.getItem('selectedCustomer');
+    return storedCustomer ? JSON.parse(storedCustomer) : null;
+  });
+
+  useEffect(() => {
+    if (selectedCustomer) {
+      localStorage.setItem('selectedCustomer', JSON.stringify(selectedCustomer));
+    } else {
+      localStorage.removeItem('selectedCustomer');
+    }
+  }, [selectedCustomer]);
 
   return (
     <SelectedCustomerContext.Provider value={{ selectedCustomer, setSelectedCustomer }}>

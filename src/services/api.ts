@@ -1,18 +1,26 @@
 // api.js
 import axios from "axios";
-import { BASE_URL, CUSTOMERS_URL, OFF_SITE_INVENTORY_URL } from "../constants";
+import { BASE_URL, CUSTOMERS_URL, OFF_SITE_INVENTORY_URL, REPLENISHMENT_URL } from "../constants";
 
 export interface CustomerData {
     customerId: number;
     companyName: string;
     deactivated: boolean;
   }
-// export interface InventoryData {
-   
-//   }
+
+ export interface SKUReplenishmentData {
+    sku: string;
+    client: string;
+    flag?: boolean;
+    threshold: string;
+    qtyToReplenish?: number;
+  }
+  
+
 
 export async function fetchCustomers() {
     try {
+      console.log("FETCHING CUSTOMER DATA")
       const response = await axios.get(BASE_URL + CUSTOMERS_URL);
       return response.data;
     } catch (error) {
@@ -22,6 +30,8 @@ export async function fetchCustomers() {
   }
 export async function fetchInventory(customerId: string | number | undefined) {
     try {
+      console.log("FETCHING INVENTORY DATA")
+
       const response = await axios.get(BASE_URL + OFF_SITE_INVENTORY_URL + `?customerId=${customerId}` );
       return response.data;
     } catch (error) {
@@ -29,35 +39,45 @@ export async function fetchInventory(customerId: string | number | undefined) {
       throw error;
     }
   }
+export async function fetchThreshold() {
+    try {
+      console.log("FETCHING REPLENISHMENT DATA")
 
-// async function request(url, options) {
-//   const response = await fetch(url, options);
-//   if (!response.ok) {
-//     throw new Error(`Request failed with status ${response.status}`);
-//   }
-//   return response.json();
-// }
+      const response = await axios.get(BASE_URL + REPLENISHMENT_URL );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching Threshold data:", error);
+      throw error;
+    }
+  }
 
-// export async function get(endpoint) {
-//   const url = `${BASE_URL}/${endpoint}`;
-//   return request(url, {
-//     method: 'GET',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       // Add any necessary authentication headers here
-//     },
-//   });
-// }
+  export const updateSKUReplenishment = async (sku: string, threshold: string): Promise<void> => {
+    try {
+      const response = await axios.put(BASE_URL + REPLENISHMENT_URL + `/${sku}`, { threshold });
+  
+      if (response.status !== 200) {
+        throw new Error('Failed to update SKU replenishment.');
+      }
+  
+      console.log('SKU replenishment updated successfully.');
+    } catch (error) {
 
-// export async function post(endpoint, data) {
-//   const url = `${BASE_URL}/${endpoint}`;
-//   return request(url, {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       // Add any necessary authentication headers here
-//     },
-//     body: JSON.stringify(data),
-//   });
-// }
-
+      console.error('Error updating SKU replenishment:', error);
+      throw error;
+    }
+  };
+  
+  export const addSKUReplenishment = async (data: SKUReplenishmentData): Promise<void> => {
+    try {
+      const response = await axios.post(BASE_URL + REPLENISHMENT_URL, data);
+  
+      if (response.status !== 201) {
+        throw new Error('Failed to add SKU replenishment.');
+      }
+  
+      console.log('SKU replenishment added successfully.');
+    } catch (error) {
+      console.error('Error adding SKU replenishment:', error);
+      throw error;
+    }
+  };
