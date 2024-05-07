@@ -30,7 +30,7 @@ const CustomerDashboard: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState("");
 
 
-    const { replenishmentData, isReplenishmentLoading, refetchReplenishmentData, setReplenishmentData } = useReplenishment();
+    const { replenishmentData, isReplenishmentLoading,  setReplenishmentData } = useReplenishment();
 
     const navigate = useNavigate();
 
@@ -49,7 +49,8 @@ const CustomerDashboard: React.FC = () => {
 
         const data : ReplenishmentData = {
             sku: selectedItem,
-            client: selectedCustomer.companyName.toString(),
+            clientId: selectedCustomer.customerId.toString(),
+            clientName: selectedCustomer.companyName.toString(),
             threshold: inputValue
         };
     
@@ -66,7 +67,6 @@ const CustomerDashboard: React.FC = () => {
                             return data;
                         });
                     }
-                    // Return null if prevData is null
                     return null;
                 });
                 
@@ -76,16 +76,13 @@ const CustomerDashboard: React.FC = () => {
                 toast.success('New SKU Threshold added successfully.');
                 setReplenishmentData((prevData: ReplenishmentData[] | null) => {
                     if (prevData) {
-                        return prevData.map(data => {
-                            if (data.sku === selectedItem) {
-                                return { ...data, threshold: inputValue };
-                            }
-                            return data;
-                        });
+                        const newData = [...prevData];
+                        newData.push(data);
+                        return newData;
                     }
-                    // Return null if prevData is null
                     return null;
                 });
+                
             }
         } catch (error) {
             console.error('Error occurred:', error);

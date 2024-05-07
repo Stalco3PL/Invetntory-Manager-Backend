@@ -10,7 +10,8 @@ export interface CustomerData {
 
  export interface SKUReplenishmentData {
     sku: string;
-    client: string;
+    clientId: string;
+    clientName: string;
     flag?: boolean;
     threshold: string;
     qtyToReplenish?: number;

@@ -6,7 +6,8 @@ import { toast } from 'react-toastify';
 
 export interface ReplenishmentData {
     sku: string;
-    client: string;
+    clientId: string;
+    clientName: string;
     flag?: boolean;
     threshold: string;
     qtyToReplenish?: number;
