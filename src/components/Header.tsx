@@ -1,27 +1,35 @@
 import React from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
-import {LinkContainer} from "react-router-bootstrap"
-import logo from "../assets/stalco logo.png"
+import { NavLink } from "react-router-dom";
+import logo from "../assets/stalco logo.png";
 
 const Header: React.FC = () => {
+  const setActiveLink = ({ isActive }: { isActive: boolean }): string =>
+    isActive ? "nav-link active" : "nav-link";
+
   return (
     <header>
       <Navbar bg="primary" variant="dark" expand="lg" collapseOnSelect>
         <Container>
-          <LinkContainer to="/">
-          <Navbar.Brand className="d-flex align-items-center">
-              <img
-                src={logo}
-                alt="Vehicle Inventory Logo"
-                height="50"
-                style={{ marginRight: "15px"}}
-              />
-              <span>Inventory Manager</span>
-            </Navbar.Brand>
-          </LinkContainer>
+          <NavLink to="/" className="d-flex align-items-center navbar-brand">
+            <img
+              src={logo}
+              alt="Stalco Logo"
+              height="50"
+              style={{ marginRight: "15px" }}
+            />
+            <span>Inventory Manager</span>
+          </NavLink>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="ms-auto"></Nav>
+            <Nav className="ms-auto">
+              <NavLink to="/" className={setActiveLink}>
+                Home
+              </NavLink>
+              <NavLink to="/replenishments" className={setActiveLink}>
+                Replenishment
+              </NavLink>
+            </Nav>
           </Navbar.Collapse>
         </Container>
       </Navbar>

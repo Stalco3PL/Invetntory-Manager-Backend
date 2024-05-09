@@ -15,10 +15,6 @@ import InventorySummary from '../components/InventorySummary';
 import useReplenishment, { ReplenishmentData } from '../hooks/useReplenishment';
 import { validateThreshold } from '../validations/thresholdValidations';
 
-
-
-
-
 const CustomerDashboard: React.FC = () => {
     const { selectedCustomer } = useSelectedCustomer();
     const { isLoading, startLoading, stopLoading } = useLoading();
@@ -78,6 +74,7 @@ const CustomerDashboard: React.FC = () => {
                     if (prevData) {
                         const newData = [...prevData];
                         newData.push(data);
+                        setSKUReplenishmentData(data)
                         return newData;
                     }
                     return null;
