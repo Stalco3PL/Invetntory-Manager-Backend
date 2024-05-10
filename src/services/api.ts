@@ -1,6 +1,7 @@
 // api.js
 import axios from "axios";
 import { BASE_URL, CUSTOMERS_URL, OFF_SITE_INVENTORY_URL, REPLENISHMENT_URL } from "../constants";
+import { error } from "console";
 
 export interface CustomerData {
     customerId: number;
@@ -82,3 +83,15 @@ export async function fetchThreshold() {
       throw error;
     }
   };
+
+  export async function fetchReplenishmentsByClientId(clientId: string) {
+    try {
+      console.log("FETCHING REPLENISHMENT DATA")
+
+      const response = await axios.get(BASE_URL + REPLENISHMENT_URL + "/by-client-flagged/" + clientId);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching Threshold data:", error);
+      throw error;
+    }
+  }

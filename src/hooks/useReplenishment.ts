@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import useLoading from './useLoading';
-import { fetchThreshold } from "../services/api";
+import { fetchReplenishmentsByClientId, fetchThreshold } from "../services/api";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -13,7 +13,7 @@ export interface ReplenishmentData {
     qtyToReplenish?: number;
 }
 
-const useReplenishment = (): { replenishmentData: ReplenishmentData[] | null, isReplenishmentLoading: boolean, refetchReplenishmentData: () => void,     setReplenishmentData: React.Dispatch<React.SetStateAction<ReplenishmentData[] | null>>  } => {
+const useReplenishment = (): { replenishmentData: ReplenishmentData[] | null, isReplenishmentLoading: boolean, refetchReplenishmentData: () => void,  fetchLatestReplenishments: (clientId : string) => void ,   setReplenishmentData: React.Dispatch<React.SetStateAction<ReplenishmentData[] | null>>  } => {
     const [replenishmentData, setReplenishmentData] = useState<ReplenishmentData[] | null>(null);
     const { isLoading: isReplenishmentLoading, startLoading: startReplenishmentLoad, stopLoading: stopReplenishmentLoad } = useLoading();
     const navigate = useNavigate();
@@ -22,6 +22,19 @@ const useReplenishment = (): { replenishmentData: ReplenishmentData[] | null, is
         startReplenishmentLoad();
         try {
             const data = await fetchThreshold();
+            setReplenishmentData(data);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            toast.error("Error fetching data:");
+            navigate("/");
+        } finally {
+            stopReplenishmentLoad();
+        }
+    };
+    const fetchLatestReplenishments = async (clientId : string) => {
+        startReplenishmentLoad();
+        try {
+            const data = await fetchReplenishmentsByClientId(clientId);
             setReplenishmentData(data);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -40,7 +53,7 @@ const useReplenishment = (): { replenishmentData: ReplenishmentData[] | null, is
         fetchData();
     };
 
-    return { replenishmentData, isReplenishmentLoading, refetchReplenishmentData, setReplenishmentData };
+    return { replenishmentData, isReplenishmentLoading, refetchReplenishmentData, setReplenishmentData,fetchLatestReplenishments };
 };
 
 export default useReplenishment;

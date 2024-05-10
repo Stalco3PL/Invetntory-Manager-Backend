@@ -1,74 +1,111 @@
-import React, {  ChangeEvent, FormEvent } from "react";
-import Button from "react-bootstrap/Button";
-import { useNavigate } from "react-router-dom";
+import React, { useState, ChangeEvent, FormEvent } from "react";
+import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
 import Loader from "../components/Loader";
-import { Col, Container, Form, Row } from "react-bootstrap";
-import { useSelectedCustomer } from "../contexts/SelectedCustomerContext";
-import { toast } from "react-toastify";
 import { useCustomers } from "../contexts/CustomerContext";
-
+import { toast } from "react-toastify";
+import useReplenishment from "../hooks/useReplenishment";
+import { CustomerData } from "../services/api";
 
 const Replenishments: React.FC = () => {
-    const { selectedCustomer, setSelectedCustomer } = useSelectedCustomer();
+    const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(null);
     const { customersData, isCustomersLoading } = useCustomers();
-    const navigate = useNavigate();
-  
+    const { replenishmentData, fetchLatestReplenishments, isReplenishmentLoading,setReplenishmentData } = useReplenishment();
+
     const handleSelect = (event: ChangeEvent) => {
-      const target = event.target as HTMLSelectElement;
-      const selectedCustomerString = target.value;
-      const selectedCustomerObject = JSON.parse(selectedCustomerString);
-      setSelectedCustomer(selectedCustomerObject);
-      console.log(selectedCustomer)
+        const target = event.target as HTMLSelectElement;
+        const selectedCustomerObject = JSON.parse(target.value);
+        setReplenishmentData(null)
+        setSelectedCustomer(selectedCustomerObject);
     };
-  
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-  
-      if (selectedCustomer !== null) {
-        navigate(`Dashboard/${selectedCustomer.companyName}`);
-      } else {
-        toast.error("Please select a customer");
-      }
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        if (selectedCustomer) {
+            try {
+                await fetchLatestReplenishments(selectedCustomer.customerId.toString());
+                if (replenishmentData && replenishmentData?.length > 0) {
+                    return;
+                } else {
+                    toast.success("No replenishment data found");
+                }
+            } catch (error) {
+                console.error("Error fetching replenishment data:", error);
+                toast.error("An error occurred while fetching replenishment data");
+            }
+        } else {
+            toast.error("Please select a customer");
+        }
     };
-  
-  return (
-    <>
-      <Container className="text-center" >
-        <h1>Replenishments</h1>
-      </Container>
-      <div className="d-flex justify-content-center " style={{ minHeight: '90vh' }}>
-        {isCustomersLoading ? (
-          <Loader />
-        ) : (
-          <Container >
-            <Row className="justify-content-center">
-              <Col md={6} xs={10}>
-                <Form onSubmit={handleSubmit}>
-                  <Form.Group controlId="selectCustomer">
-                    <Form.Control as="select" onChange={handleSelect}>
-                      <option value="">Select a Customer...</option>
-                      {customersData && customersData.map((customer) => (
-                        <option key={customer.customerId} value={JSON.stringify(customer)}>
-                          {customer.companyName}
-                        </option>
-                      ))}
-                    </Form.Control>
-                  </Form.Group>
-                  <Row className="justify-content-center">
-                    <Col xs="auto">
-                      <Button variant="primary" type="submit" className="mt-3">
-                        Select
-                      </Button>
-                    </Col>
-                  </Row>
-                </Form>
-              </Col>
-            </Row>
-          </Container>
-        )}
-      </div>
-    </>
-  );
+
+
+    return (
+        <Container fluid="md" className="text-center my-4">
+            <h1>Replenishments</h1>
+            <div className="d-flex justify-content-center " style={{ minHeight: '90vh' }}>
+                {isCustomersLoading ? <Loader /> : (
+                    <Container>
+                        <Form onSubmit={handleSubmit}>
+                            <Row className="justify-content-center mb-3">
+                                <Col md={6}>
+                                    <Form.Group controlId="selectCustomer">
+                                        <Form.Control as="select" onChange={handleSelect} defaultValue="">
+                                            <option disabled value="">Select a Customer...</option>
+                                            {/* <option value="All">
+                                                All
+                                            </option> */}
+                                            {customersData?.map(customer => (
+                                                <option key={customer.customerId} value={JSON.stringify(customer)}>
+                                                    {customer.companyName}
+                                                </option>
+                                            ))}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                                <Col md="auto">
+                                    <Button variant="primary" type="submit">
+                                        Select
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Form>
+
+                        {isReplenishmentLoading ? (
+                            <Loader />
+                        ) : (
+                            selectedCustomer && replenishmentData && replenishmentData.length > 0 ? (
+                                <Table striped bordered hover>
+                                    <thead>
+                                        <tr>
+                                            <th>Client Name</th>
+                                            <th>SKU</th>
+                                            <th>Threshold</th>
+                                            <th>Quantity to Replenish</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {replenishmentData.map((item, index) => (
+                                            <tr key={index}>
+                                                <td>{item.clientName}</td>
+                                                <td>{item.sku}</td>
+                                                <td>{item.threshold}</td>
+                                                <td>{item.qtyToReplenish}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </Table>
+                            ) : (
+                                <div className="text-center mt-4">
+                                    <h2>{selectedCustomer && replenishmentData?.length == 0 ? "No Replenishments to show" : ""}</h2>
+                                </div>
+                            )
+                        )}
+
+                    </Container>
+                )}
+            </div>
+        </Container>
+    );
 };
 
 export default Replenishments;

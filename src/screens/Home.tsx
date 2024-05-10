@@ -32,7 +32,7 @@ const Home: React.FC = () => {
   return (
     <>
       <Container className="text-center" style={{ minHeight: '10vh' }}>
-        <h1>Inventory distribution based on Warehouse location</h1>
+        <h1>Inventory distribution according to Warehouse location</h1>
       </Container>
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '75vh' }}>
         {isCustomersLoading ? (
