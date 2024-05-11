@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 
 import { useSelectedCustomer } from '../contexts/SelectedCustomerContext';
 import { useLoading } from '../contexts/LoadingContext';
-import { addSKUReplenishment, fetchInventory, updateSKUReplenishment } from "../services/api";
+import { addSKUReplenishment, fetchInventory, updateSKUReplenishment, deleteSKUReplenishment } from "../services/api";
 
 import PieChartComponent from '../components/PieChartComponent';
 import BarChartComponent from '../components/BarChartComponent';
@@ -19,72 +19,87 @@ const CustomerDashboard: React.FC = () => {
     const { selectedCustomer } = useSelectedCustomer();
     const { isLoading, startLoading, stopLoading } = useLoading();
     const [inventoryData, setInventoryData] = useState<{ summary: { [key: string]: number }, detail: { [key: string]: { [key: string]: number } } } | null>(null);
-    const [selectedItem, setSelectedItem] = useState<string>("");
-    const [SKUReplenishmentData, setSKUReplenishmentData] = useState<ReplenishmentData | null>(null);
-    const [searchTerm, setSearchTerm] = useState<string>('');
-    const [inputValue, setInputValue] = useState<string >('');
-    const [errorMessage, setErrorMessage] = useState("");
+    const [selectedItem, setSelectedItem] = useState<string>("");  //selected SKU from the list
+    const [SKUReplenishmentData, setSKUReplenishmentData] = useState<ReplenishmentData | null>(null); //replenishment data of selected SKU.
+    const [searchTerm, setSearchTerm] = useState<string>('');  // Searching from list of SKUs
+    const [inputValue, setInputValue] = useState<string >('');  //Threshold value
+    const [errorMessage, setErrorMessage] = useState(""); //for input validation
 
 
     const { replenishmentData, isReplenishmentLoading,  setReplenishmentData } = useReplenishment();
 
     const navigate = useNavigate();
 
-    const handleThresholdButtonClick = async () => {
+    const validateAndFormatData = () => {
         const validationError = validateThreshold(inputValue.toString());
         if (validationError) {
             setErrorMessage(validationError);
-            return;
+            return null;
+        } else {
+            setErrorMessage("")
         }
     
-        if (!selectedItem) {
-         
-            console.error('Error: Selected item is null or undefined.');
-            return;
+        if (!selectedItem || !selectedCustomer) {
+            console.error('Error: Selected item or customer is null or undefined.');
+            return null;
         }
-
-        const data : ReplenishmentData = {
+    
+        return {
             sku: selectedItem,
             clientId: selectedCustomer.customerId.toString(),
             clientName: selectedCustomer.companyName.toString(),
             threshold: inputValue
         };
+    };
+    
+    const updateReplenishmentData = async () => {
+        // Retrieve current threshold for the selected item
+        const currentItem = replenishmentData?.find(d => d.sku === selectedItem);
+    
+        // Check if inputValue is the same as the current threshold
+        if (currentItem?.threshold === inputValue) {
+            toast.info('No changes detected in SKU Threshold.');
+            return; // Exit if the current threshold is the same as the input value
+        }
+    
+        // Proceed with deletion or update based on the inputValue
+        if (parseInt(inputValue) === 0) {
+            await deleteSKUReplenishment(selectedItem);
+            toast.success('SKU Threshold deleted successfully.');
+            setReplenishmentData(prevData => prevData?.filter(d => d.sku !== selectedItem) || null);
+            setSKUReplenishmentData(null);
+            setInputValue("");
+        } else {
+            await updateSKUReplenishment(selectedItem, inputValue);
+            toast.success('SKU Threshold updated successfully.');
+            setReplenishmentData(prevData =>
+                prevData?.map(d => d.sku === selectedItem ? { ...d, threshold: inputValue } : d) || null
+            );
+        }
+    };
+    
+    
+    const addReplenishmentData = async (data: ReplenishmentData) => {
+        await addSKUReplenishment(data);
+        toast.success('New SKU Threshold added successfully.');
+        setReplenishmentData(prevData => prevData ? [...prevData, data] : [data]);
+        setSKUReplenishmentData(data);
+    };
+    
+
+    const handleThresholdButtonClick = async () => {
+        const data = validateAndFormatData();
+        if (!data) return;
     
         try {
             if (SKUReplenishmentData) {
-                await updateSKUReplenishment(selectedItem, inputValue);
-                toast.success('SKU Threshold updated successfully.');
-                setReplenishmentData((prevData: ReplenishmentData[] | null) => {
-                    if (prevData) {
-                        return prevData.map(data => {
-                            if (data.sku === selectedItem) {
-                                return { ...data, threshold: inputValue };
-                            }
-                            return data;
-                        });
-                    }
-                    return null;
-                });
-                
-                
+                await updateReplenishmentData();
             } else {
-                await addSKUReplenishment(data);
-                toast.success('New SKU Threshold added successfully.');
-                setReplenishmentData((prevData: ReplenishmentData[] | null) => {
-                    if (prevData) {
-                        const newData = [...prevData];
-                        newData.push(data);
-                        setSKUReplenishmentData(data)
-                        return newData;
-                    }
-                    return null;
-                });
-                
+                await addReplenishmentData(data);
             }
         } catch (error) {
             console.error('Error occurred:', error);
-            toast.error("Error occured");
-        
+            toast.error("Error occurred");
         }
     };
     
@@ -103,7 +118,6 @@ const CustomerDashboard: React.FC = () => {
     };
 
     useEffect(() => {
-
         const fetchData = async () => {
             startLoading();
             try {
@@ -117,7 +131,6 @@ const CustomerDashboard: React.FC = () => {
                 stopLoading();
             }
         };
-
         fetchData();
     }, [selectedCustomer]);
 

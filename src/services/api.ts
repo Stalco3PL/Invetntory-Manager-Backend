@@ -68,6 +68,21 @@ export async function fetchThreshold() {
       throw error;
     }
   };
+  export const deleteSKUReplenishment = async (sku: string): Promise<void> => {
+    try {
+      const response = await axios.delete(BASE_URL + REPLENISHMENT_URL + `/${sku}`);
+  
+      if (response.status !== 200) {
+        throw new Error('Failed to delete SKU replenishment.');
+      }
+  
+      console.log('SKU replenishment deleted successfully.');
+    } catch (error) {
+
+      console.error('Error deleting SKU replenishment:', error);
+      throw error;
+    }
+  };
   
   export const addSKUReplenishment = async (data: SKUReplenishmentData): Promise<void> => {
     try {

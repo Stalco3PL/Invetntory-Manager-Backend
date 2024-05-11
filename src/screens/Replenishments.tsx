@@ -24,11 +24,7 @@ const Replenishments: React.FC = () => {
         if (selectedCustomer) {
             try {
                 await fetchLatestReplenishments(selectedCustomer.customerId.toString());
-                if (replenishmentData && replenishmentData?.length > 0) {
-                    return;
-                } else {
-                    toast.success("No replenishment data found");
-                }
+   
             } catch (error) {
                 console.error("Error fetching replenishment data:", error);
                 toast.error("An error occurred while fetching replenishment data");
