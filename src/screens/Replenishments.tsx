@@ -5,6 +5,7 @@ import { useCustomers } from "../contexts/CustomerContext";
 import { toast } from "react-toastify";
 import useReplenishment from "../hooks/useReplenishment";
 import { CustomerData } from "../services/api";
+import ReplenishmentTable from "../components/ReplenishmentTable";
 
 const Replenishments: React.FC = () => {
     const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(null);
@@ -37,6 +38,7 @@ const Replenishments: React.FC = () => {
 
     return (
         <Container fluid="md" className="text-center my-4">
+            
             <h1>Replenishments</h1>
             <div className="d-flex justify-content-center " style={{ minHeight: '90vh' }}>
                 {isCustomersLoading ? <Loader /> : (
@@ -70,26 +72,7 @@ const Replenishments: React.FC = () => {
                             <Loader />
                         ) : (
                             selectedCustomer && replenishmentData && replenishmentData.length > 0 ? (
-                                <Table striped bordered hover>
-                                    <thead>
-                                        <tr>
-                                            <th>Client Name</th>
-                                            <th>SKU</th>
-                                            <th>Threshold</th>
-                                            <th>Quantity to Replenish</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {replenishmentData.map((item, index) => (
-                                            <tr key={index}>
-                                                <td>{item.clientName}</td>
-                                                <td>{item.sku}</td>
-                                                <td>{item.threshold}</td>
-                                                <td>{item.qtyToReplenish}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </Table>
+                               <ReplenishmentTable replenishmentData={replenishmentData}/>
                             ) : (
                                 <div className="text-center mt-4">
                                     <h2>{selectedCustomer && replenishmentData?.length == 0 ? "No Replenishments to show" : ""}</h2>
